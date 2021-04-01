@@ -8,7 +8,6 @@ defaults: &defaults
     TERM: dumb
     _JAVA_OPTIONS: "-Xmx3072m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
 
-
 commands:
   setup_gradle:
     steps:
@@ -21,6 +20,22 @@ commands:
           paths:
             - ~/.gradle
           key: jars-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}
+  step_build:
+    steps:
+      - run:
+          name: Run Tests
+          command: ./gradlew -w clean testDevelopReleaseUnitTest
+      - run:
+          name: Run Build
+          command: ./gradlew -w clean assembleDevelopRelease
+          no_output_timeout: 30m
+  step_release:
+    steps:
+      - run:
+          name: Release Note & Run Upload (Firebase AppDistribution)
+            command:|
+              echo $(git log --format=%B -n 1 $CIRCLE_SHA1) > ./app/release_notes.txt
+               ./gradlew appDistributionUploadDevelopRelease
 
 jobs:
   build-and-test:
@@ -28,6 +43,8 @@ jobs:
     steps:
       - checkout
       - setup_gradle
+      - step_build
+      - step_release
 
 workflows:
   version: 2

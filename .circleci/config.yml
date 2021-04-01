@@ -34,8 +34,8 @@ commands:
       - run:
           name: Release Note & Run Upload (Firebase AppDistribution)
             command:|
-              echo $(git log --format=%B -n 1 $CIRCLE_SHA1) > ./app/release_notes.txt
-               ./gradlew appDistributionUploadDevelopRelease
+            echo $(git log --format=%B -n 1 $CIRCLE_SHA1) > ./app/release_notes.txt
+            ./gradlew appDistributionUploadDevelopRelease
 
 jobs:
   build-and-test:

@@ -48,11 +48,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - run:
-          name: Download dependencies
-          command: |
-            sudo chmod +x ./gradlew
-            ./gradlew androidDependencies
+      - setup_gradle
       - run:
           name: Gradle build (debug)
           command: ./gradlew -PciBuild=true :app:assembleDebug :app:assembleAndroidTest

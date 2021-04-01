@@ -1,8 +1,19 @@
-version: 2.1
+version: 2
 
-orbs:
-  android: circleci/android@0.2.1
+references:
+  cache_key: &cache_key
+    key: cache-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
 
+  restore_cache: &restore_cache
+    restore_cache:
+      <<: *cache_key
+
+  save_cache: &save_cache
+    save_cache:
+      <<: *cache_key
+      paths:
+        - ~/.gradle
+        - ~/.m2
 jobs:
   build:
     executor: android/android

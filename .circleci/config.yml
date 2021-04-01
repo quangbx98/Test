@@ -50,7 +50,7 @@ jobs:
       - checkout
       - run:
           name: Gradle build (debug)
-          command: ./gradlew -PciBuild=true :app:assembleDebug :app:assembleAndroidTest
+          command: chmod +x gradlew -PciBuild=true :app:assembleDebug :app:assembleAndroidTest
       - store_artifacts:
           path: app/build/outputs/apk/
           destination: /apk/

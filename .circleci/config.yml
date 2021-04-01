@@ -1,13 +1,57 @@
-version: 2.1
+version: 2
 
-orbs:
-  android: circleci/android@0.2.1
+defaults: &defaults
+  working_directory: ~/workspace
+  docker:
+    - image: circleci/android:api-28
+  environment:
+    TERM: dumb
+    _JAVA_OPTIONS: "-Xmx3072m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+
+commands:
+  setup_gradle:
+    steps:
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}
+  step_build:
+    steps:
+      - run:
+          name: Run Tests
+          command: ./gradlew -w clean testDevelopReleaseUnitTest
+      - run:
+          name: Run Build
+          command: ./gradlew -w clean assembleDevelopRelease
+          no_output_timeout: 30m
+  step_release:
+    steps:
+      - run:
+          name: Release Note & Run Upload (Firebase AppDistribution)
+            command:|
+              echo $(git log --format=%B -n 1 $CIRCLE_SHA1) > ./app/release_notes.txt
+               ./gradlew appDistributionUploadDevelopRelease
 
 jobs:
-  build:
-    executor: android/android
-
+  build-and-test:
+    <<: *defaults
     steps:
       - checkout
-      - run:
-          command: chmod +x gradlew
+      - setup_gradle
+      - step_build
+      - step_release
+
+workflows:
+  version: 2
+  build_test_lint:
+    jobs:
+      - build-and-test:
+          filters:
+            branches:
+              only:
+                - master

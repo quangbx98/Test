@@ -48,7 +48,6 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - setup_gradle
       - run:
           name: Gradle build (debug)
           command: ./gradlew -PciBuild=true :app:assembleDebug :app:assembleAndroidTest

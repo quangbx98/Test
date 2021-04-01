@@ -96,6 +96,7 @@ commands:
       - store_artifacts:
           path: firebase/
           destination: /firebase/
+
 jobs:
   build_debug:
     <<: *defaults

@@ -1,24 +1,40 @@
 version: 2
 
-references:
-  cache_key: &cache_key
-    key: cache-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+defaults: &defaults
+  working_directory: ~/workspace
+  docker:
+    - image: circleci/android:api-28
+  environment:
+    TERM: dumb
+    _JAVA_OPTIONS: "-Xmx3072m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
 
-  restore_cache: &restore_cache
-    restore_cache:
-      <<: *cache_key
 
-  save_cache: &save_cache
-    save_cache:
-      <<: *cache_key
-      paths:
-        - ~/.gradle
-        - ~/.m2
+commands:
+  setup_gradle:
+    steps:
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}
+
 jobs:
-  build:
-    executor: android/android
-
+  build-and-test:
+    <<: *defaults
     steps:
       - checkout
-      - run:
-          command: chmod +x gradlew
+      - setup_gradle
+
+workflows:
+  version: 2
+  build_test_lint:
+    jobs:
+      - build-and-test:
+          filters:
+            branches:
+              only:
+                - master

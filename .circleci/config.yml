@@ -102,7 +102,7 @@ jobs:
           command: gcloud config set project test-circle-ci-cc385
       - run:
           name: Authenticate with Google Cloud
-          command: firebase-adminsdk-w8nuh@test-circle-ci-cc385.iam.gserviceaccount.com  --key-file ${HOME}/client-secret.json
+          command: firebase-adminsdk-w8nuh@test-circle-ci-cc385.iam.gserviceaccount.com
       - run:
           name: Run instrumented test on Firebase Test Lab
           command: gcloud firebase test android run --type instrumentation --app app/build/outputs/apk/debug/app-debug.apk --test app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk --device model=sailfish,version=26,locale=en_US,orientation=portrait --environment-variables coverage=true,coverageFile=/sdcard/tmp/code-coverage/connected/coverage.ec --directories-to-pull=/sdcard/tmp --timeout 20m

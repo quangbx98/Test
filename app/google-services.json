@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "666141441619",
+    "project_id": "test-circle-ci-cc385",
+    "storage_bucket": "test-circle-ci-cc385.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:666141441619:android:ca414acad053fb8bf890a6",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "666141441619-v82m6uss857o117190k0vsoi6c37q6vs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxDri6pnDrTz_B8Lj8a3lUdTgIeAJm-ug"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "666141441619-v82m6uss857o117190k0vsoi6c37q6vs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

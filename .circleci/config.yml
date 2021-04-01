@@ -7,55 +7,87 @@ defaults: &defaults
   environment:
     TERM: dumb
 
-commands:
-  setup_gradle:
-    steps:
-      - restore_cache:
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}
-      - run:
-          name: Download Dependencies
-          command: ./gradlew androidDependencies
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: jars-{{ checksum "build.gradle" }}-{{ checksum "app/build.gradle" }}
-  step_build:
-    steps:
-      - run:
-          name: Run Tests
-          command: ./gradlew -w clean testDevelopReleaseUnitTest
-      - run:
-          name: Run Build
-          command: ./gradlew -w clean assembleDevelopRelease
-          no_output_timeout: 30m
-  step_release:
-    steps:
-      - run:
-          name: Release Note & Run Upload (Firebase AppDistribution)
-            command:|
-            echo $(git log --format=%B -n 1 $CIRCLE_SHA1) > ./app/release_notes.txt
-            ./gradlew appDistributionUploadDevelopRelease
+cache_key: &cache_key
+  key: cache-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
 
-jobs:
-  build-and-test:
+restore_cache: &restore_cache
+  restore_cache:
+    <<: *cache_key
+
+save_cache: &save_cache
+  save_cache:
+    <<: *cache_key
+    paths:
+      - ~/.gradle
+      - ~/.m2
+
+export_gservices_key: &export_gservices_key
+  run:
+    name: Export Google Services key environment variable
+    command: echo 'export GOOGLE_SERVICES_KEY="$GOOGLE_SERVICES_KEY"' >> $BASH_ENV
+
+decode_gservices_key: &decode_gservices_key
+  run:
+    name: Decode Google Services key
+    command: echo $GOOGLE_SERVICES_KEY | base64 -di > app/google-services.json
+
+export_gcloud_key: &export_gcloud_key
+  run:
+    name: Export Google Cloud Service key environment variable
+    command: echo 'export GCLOUD_SERVICE_KEY="$GCLOUD_SERVICE_KEY"' >> $BASH_ENV
+decode_gcloud_key: &decode_gcloud_key
+  run:
+    name: Decode Google Cloud credentials
+    command: echo $GCLOUD_SERVICE_KEY | base64 -di > ${HOME}/client-secret.json
+
+commands:
+  test_unit:
     <<: *defaults
     steps:
       - checkout
-      - setup_gradle
-      - step_build
-      - step_release
+      - *restore_cache
+      - run:
+          name: Download dependencies
+          command: |
+            sudo chmod +x ./gradlew
+            ./gradlew androidDependencies
+      - *save_cache
+      - *export_gservices_key
+      - *decode_gservices_key
+      - run:
+          name: Run unit tests
+          command: ./gradlew -PciBuild=true :app:testDebugUnitTest
+      - store_artifacts:
+          path: app/build/reports/
+          destination: /reports/
+      - store_test_results:
+          path: app/build/test-results/
+          destination: /test-results/
   build_debug:
     <<: *defaults
     steps:
       - checkout
+      - *restore_cache
+      - run:
+          name: Download dependencies
+          command: |
+            sudo chmod +x ./gradlew
+            ./gradlew androidDependencies
+      - *save_cache
+      - *export_gservices_key
+      - *decode_gservices_key
       - run:
           name: Gradle build (debug)
           command: ./gradlew -PciBuild=true :app:assembleDebug :app:assembleAndroidTest
       - store_artifacts:
           path: app/build/outputs/apk/
           destination: /apk/
+
 workflows:
   version: 2
   build_test_lint:
     jobs:
       - build_debug
+      - test_unit:
+          requires:
+            - build_debug

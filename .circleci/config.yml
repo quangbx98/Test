@@ -7,13 +7,6 @@ defaults: &defaults
   environment:
     TERM: dumb
 
-gcloud_config: &gcloud_config
-  working_directory: ~/workspace
-  docker:
-    - image: google/cloud-sdk:latest
-  environment:
-    TERM: dumb
-
 cache_key: &cache_key
   key: cache-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
 
@@ -61,28 +54,11 @@ jobs:
       - run:
           name: Publish APK to Firebase Distribution
           command: ./gradlew assembleDebug appDistributionUploadDebug
-  test_unit:
-    <<: *defaults
-    steps:
-      - checkout
-      - *restore_cache
       - run:
-          name: Download dependencies
+          name: Run Upload (Firebase AppDistribution)
           command: |
-            sudo chmod +x ./gradlew
-            ./gradlew androidDependencies
-      - *save_cache
-      - *export_gservices_key
-      - *decode_gservices_key
-      - run:
-          name: Run unit tests
-          command: ./gradlew -PciBuild=true :app:testDebugUnitTest
-      - store_artifacts:
-          path: app/build/reports/
-          destination: /reports/
-      - store_test_results:
-          path: app/build/test-results/
-          destination: /test-results/
+            echo $(git log --format=%B -n 1 $CIRCLE_SHA1) > ./app/release_notes.txt
+            ./gradlew appDistributionUploadDevelopRelease
 
 workflows:
   version: 2

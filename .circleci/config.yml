@@ -29,7 +29,7 @@ export_gservices_key: &export_gservices_key
 decode_gservices_key: &decode_gservices_key
   run:
     name: Decode Google Services key
-    command: echo $GOOGLE_SERVICES_KEY | base64 -di > app/google-services.json
+    command: echo $AAAAmxkfvlM:APA91bHn9FE2dty0MNSjwsSbZilc5QYmMwrG67IX0yzY5xdELs3d8O424d-BZui7eaHCZMqoVMyWMaTw11Nlu9bChmzHKeMRUK7U8o2BZ9lRBOt13JnadtHedG9ckHeGhtoj8aVEeNje | base64 -di > app/google-services.json
 
 jobs:
   build_debug:

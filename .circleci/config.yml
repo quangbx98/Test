@@ -38,15 +38,6 @@ decode_gservices_key: &decode_gservices_key
     name: Decode Google Services key
     command: echo $GOOGLE_SERVICES_KEY | base64 -di > app/google-services.json
 
-export_gcloud_key: &export_gcloud_key
-  run:
-    name: Export Google Cloud Service key environment variable
-    command: echo 'export GCLOUD_SERVICE_KEY="$GCLOUD_SERVICE_KEY"' >> $BASH_ENV
-decode_gcloud_key: &decode_gcloud_key
-  run:
-    name: Decode Google Cloud credentials
-    command: echo $GCLOUD_SERVICE_KEY | base64 -di > ${HOME}/client-secret.json
-
 jobs:
   build_debug:
     <<: *defaults
@@ -89,7 +80,9 @@ jobs:
       - store_test_results:
           path: app/build/test-results/
           destination: /test-results/
-
+      - run:
+          name: Publish APK to Firebase Distribution
+          command: ./gradlew assembleDebug appDistributionUploadDebug
 workflows:
   version: 2
   build_test_lint:

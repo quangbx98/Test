@@ -53,7 +53,7 @@ jobs:
           destination: /apk/
       - run:
           name: Publish APK to Firebase Distribution
-          command: ./gradlew :app:assembleDebug appDistributionUploadDebug
+          command: ./gradlew assembleDebug appDistributionUploadDebug
 
 workflows:
   version: 2

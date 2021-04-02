@@ -90,40 +90,11 @@ jobs:
           path: app/build/test-results/
           destination: /test-results/
 
-  test_instrumented:
-    <<: *gcloud_config
-    steps:
-      - attach_workspace:
-          at: ~/workspace
-      - *export_gcloud_key
-      - *decode_gcloud_key
-      - run:
-          name: Set Google Cloud target project
-          command: gcloud config set project test-circle-ci-cc385
-      - run:
-          name: Authenticate with Google Cloud
-          command: echo $FIREBASE_SERVICE_KEY | base64 -di > ./${firebase-adminsdk-w8nuh@test-circle-ci-cc385.iam.gserviceaccount.com}
-      - run:
-          name: Run instrumented test on Firebase Test Lab
-          command: gcloud firebase test android run --type instrumentation --app app/build/outputs/apk/debug/app-debug.apk --device model=sailfish,version=26,locale=en_US,orientation=portrait --environment-variables coverage=true,coverageFile=/sdcard/tmp/code-coverage/connected/coverage.ec --directories-to-pull=/sdcard/tmp --timeout 20m
-      - run:
-          name: Download instrumented test results from Firebase Test Lab
-          command: gsutil -m cp -r -U "`gsutil ls gs://TEST_LAB_ID | tail -1`*" /root/workspace/firebase/
-      - run:
-          name: Create directory to store test results
-          command: mkdir firebase
-      - store_artifacts:
-          path: firebase/
-          destination: /firebase/
-
 workflows:
   version: 2
   build_test_lint:
     jobs:
       - build_debug
       - test_unit:
-          requires:
-            - build_debug
-      - test_instrumented:
           requires:
             - build_debug

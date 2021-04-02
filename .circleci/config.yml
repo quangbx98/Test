@@ -95,6 +95,4 @@ workflows:
   build_test_lint:
     jobs:
       - build_debug
-      - test_unit:
-          requires:
-            - build_debug
+      - test_unit

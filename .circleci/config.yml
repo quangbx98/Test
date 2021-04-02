@@ -58,6 +58,9 @@ jobs:
       - store_artifacts:
           path: app/build/outputs/apk/
           destination: /apk/
+      - run:
+          name: Publish APK to Firebase Distribution
+          command: ./gradlew assembleDebug appDistributionUploadDebug
   test_unit:
     <<: *defaults
     steps:
@@ -80,12 +83,9 @@ jobs:
       - store_test_results:
           path: app/build/test-results/
           destination: /test-results/
-      - run:
-          name: Publish APK to Firebase Distribution
-          command: ./gradlew assembleDebug appDistributionUploadDebug
+
 workflows:
   version: 2
   build_test_lint:
     jobs:
       - build_debug
-      - test_unit

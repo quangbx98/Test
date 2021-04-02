@@ -51,9 +51,6 @@ jobs:
       - store_artifacts:
           path: app/build/outputs/apk/
           destination: /apk/
-      - run:
-          name: Publish APK to Firebase Distribution
-          command: ./gradlew assembleDebug appDistributionUploadDebug
 
 workflows:
   version: 2

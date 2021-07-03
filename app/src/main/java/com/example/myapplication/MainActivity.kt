@@ -18,5 +18,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initView() {
+        button1.setOnClickListener {
+            println("Hello")
+
+
+
+        }
     }
 }
